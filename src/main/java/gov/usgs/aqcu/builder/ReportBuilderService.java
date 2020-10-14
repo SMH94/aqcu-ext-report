@@ -22,6 +22,7 @@ import gov.usgs.aqcu.model.ExtremesQualifier;
 import gov.usgs.aqcu.model.ExtremesReport;
 import gov.usgs.aqcu.model.ExtremesReportMetadata;
 import gov.usgs.aqcu.model.TimeSeriesMinMax;
+import gov.usgs.aqcu.model.nwis.GroundWaterParameter;
 import gov.usgs.aqcu.parameter.ExtremesRequestParameters;
 import gov.usgs.aqcu.retrieval.LocationDescriptionListService;
 import gov.usgs.aqcu.retrieval.QualifierLookupService;
@@ -44,7 +45,8 @@ public class ReportBuilderService {
 	private TimeSeriesDescriptionListService timeSeriesDescriptionListService;
 	private TimeSeriesDataService timeSeriesDataService;
 	private QualifierLookupService qualifierLookupService;
-
+	
+	
 	@Autowired
 	public ReportBuilderService(
 		LocationDescriptionListService locationDescriptionListService,
@@ -78,7 +80,7 @@ public class ReportBuilderService {
 		TimeSeriesDescription primaryDescription = timeSeriesDescriptions.get(requestParameters.getPrimaryTimeseriesIdentifier());
 		ZoneOffset primaryZoneOffset = TimeSeriesUtils.getZoneOffset(primaryDescription);
 		Boolean primaryIsDaily = TimeSeriesUtils.isDailyTimeSeries(primaryDescription);
-		
+
 		TimeSeriesDataServiceResponse primaryData = timeSeriesDataService
 				.get(primaryDescription.getUniqueId(), requestParameters,  primaryZoneOffset, primaryIsDaily, false, false, null);
 		
@@ -204,6 +206,11 @@ public class ReportBuilderService {
 			metadata.setPrimaryUnit(primarySeriesDescription.getUnit());
 			metadata.setPrimaryLabel(primarySeriesDescription.getIdentifier());
 			metadata.setTimezone(AqcuTimeUtils.getTimezone(primarySeriesDescription.getUtcOffset()));
+
+			GroundWaterParameter gwParameter = GroundWaterParameter.getByDisplayName(primarySeriesDescription.getParameter());
+			if (gwParameter != null) {
+				metadata.setInverted(gwParameter.isInverted());
+			}
 			
 			if (timeSeriesDescriptions.containsKey(requestParameters.getDerivedTimeseriesIdentifier())) {
 				metadata.setDvLabel(
