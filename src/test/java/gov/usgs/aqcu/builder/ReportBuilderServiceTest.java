@@ -219,6 +219,7 @@ public class ReportBuilderServiceTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void buildReportFullTest() {
+		primaryDesc.setParameter("WaterLevel, BelowLSD");
 		given(tsDescService.getTimeSeriesDescriptionList(any(List.class))).willReturn(
 			Arrays.asList(primaryDesc, upchainDesc, derivedDesc)
 		);
@@ -301,6 +302,9 @@ public class ReportBuilderServiceTest {
 		assertEquals(result.getReportMetadata().getUpchainLabel(), upchainDesc.getIdentifier());
 		assertEquals(result.getReportMetadata().getDvLabel(), derivedDesc.getIdentifier());
 		assertEquals(result.getReportMetadata().getQualifierMetadata().size(), 3);
+		assertTrue(result.getReportMetadata().isInverted());
+
+		primaryDesc.setParameter("primary-param");
 	}
 
 	@Test
@@ -370,6 +374,7 @@ public class ReportBuilderServiceTest {
 		assertEquals(result.getReportMetadata().getUpchainLabel(), upchainDesc.getIdentifier());
 		assertEquals(result.getReportMetadata().getDvLabel(), derivedDesc.getIdentifier());
 		assertEquals(result.getReportMetadata().getQualifierMetadata().size(), 3);
+		assertFalse(result.getReportMetadata().isInverted());
 	}
 
 	@Test
